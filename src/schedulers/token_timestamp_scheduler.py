@@ -36,7 +36,7 @@ token_id_list = get_token_list()
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', start_date='2022-08-03 03:00:00', days=1, misfire_grace_time=10000)
+@sched.scheduled_job('interval', start_date='2022-08-26 03:00:00', days=1, misfire_grace_time=10000)
 def function():
     print('Token Timestamp Scheduler Started')
     get_token_timestamp_and_post_concurrently(token_id_list)
