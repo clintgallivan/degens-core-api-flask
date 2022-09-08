@@ -166,4 +166,4 @@ def batch_update_user_leaderboards():
     print('finished batch updating users')
 
 
-batch_update_user_leaderboards()
+# batch_update_user_leaderboards()

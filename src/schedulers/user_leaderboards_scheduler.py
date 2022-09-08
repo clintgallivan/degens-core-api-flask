@@ -10,7 +10,7 @@ caffeine.on(display=False)
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', start_date='2022-08-04 14:00:00', hours=1, misfire_grace_time=10000)
+@sched.scheduled_job('interval', start_date='2022-09-08 12:35:00', hours=1, misfire_grace_time=10000)
 def function():
     print('User Leaderboard Scheduler Started')
     batch_update_user_leaderboards()
