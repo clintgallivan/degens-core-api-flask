@@ -11,9 +11,8 @@ data = json.load(f)
 # print(data)
 
 
-def transform(ex_timestamp):
-    asDateTime = dt.strptime(ex_timestamp, "%m-%d-%YT%H:%M:%S")
-    asInt = asDateTime.timestamp()
+def transform_timestamp(ts):
+    asInt = ts.timestamp()
     asRounded = int(round(asInt * 1000))
     obj = {"$date": {
         "$numberLong": str(asRounded)
