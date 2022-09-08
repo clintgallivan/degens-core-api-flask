@@ -1,6 +1,6 @@
 
 # * Run once an hour to update user historical data - call
-
+import os
 import requests
 import pandas as pd
 import numpy as np
@@ -10,8 +10,8 @@ import json
 from datetime import datetime, timedelta
 import pytz
 import copy
-coingecko_base_url = 'https://api.coingecko.com/api/v3'
-mongo_base_url = 'http://127.0.0.1:5001'
+coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 now = datetime.now(pytz.utc)
 new_user_data = []

@@ -1,6 +1,6 @@
 
 # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-
+import os
 import requests
 import pandas as pd
 import numpy as np
@@ -10,8 +10,8 @@ import json
 # from datetime import date
 # import datetime as dt
 # import pytz
-coingecko_base_url = 'https://api.coingecko.com/api/v3'
-mongo_base_url = 'http://127.0.0.1:5000'
+coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 logs = []
 
@@ -216,7 +216,7 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
 # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
 
 # # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-
+# import os
 # import requests
 # import pandas as pd
 # import numpy as np
@@ -226,8 +226,8 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
 # # from datetime import date
 # # import datetime as dt
 # # import pytz
-# coingecko_base_url = 'https://api.coingecko.com/api/v3'
-# mongo_base_url = 'http://127.0.0.1:5000'
+coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 # logs = []
 

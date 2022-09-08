@@ -1,6 +1,6 @@
 
 # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-
+import os
 from operator import index
 import requests
 import pandas as pd
@@ -9,7 +9,7 @@ import time
 import random
 import json
 
-mongo_base_url = 'http://127.0.0.1:5000'
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 
 def get_token_current_metadata():
@@ -50,7 +50,7 @@ get_token_substr_data_and_post_concurrently()
 # * Run once a day to insert top token document - call get_token_timestamp_and_post_concurrently(token_id_list)
 
 # # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-
+# import os
 # from operator import index
 # import requests
 # import pandas as pd
@@ -59,7 +59,7 @@ get_token_substr_data_and_post_concurrently()
 # import random
 # import json
 
-# mongo_base_url = 'http://127.0.0.1:5000'
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 
 # def get_token_current_metadata():

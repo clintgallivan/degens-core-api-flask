@@ -1,14 +1,15 @@
 
 # * Run once a week to update token list - call get_token_metadata_and_post_concurrently(token_id_list)
-
+import os
 import requests
 import pandas as pd
 import numpy as np
 import time
 import random
 import json
-coingecko_base_url = 'https://api.coingecko.com/api/v3'
-mongo_base_url = 'http://127.0.0.1:5000'
+
+coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 
 def get_platforms_api():

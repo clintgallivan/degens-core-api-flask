@@ -1,3 +1,4 @@
+import os
 from flask import Flask, Blueprint
 from flask import request
 import pymongo
@@ -9,8 +10,7 @@ import numpy as np
 import datetime as dt
 import pytz
 
-cluster = MongoClient(
-    "mongodb+srv://cgallivan:P%40perless2020@cluster0.r1pdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
 db = cluster["tokens"]
 collection = db["token-filters"]
 

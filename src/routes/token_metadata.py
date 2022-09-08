@@ -1,3 +1,4 @@
+import os
 from flask import Flask, Blueprint
 from flask import request
 import pymongo
@@ -7,8 +8,7 @@ from bson import json_util
 import pandas as pd
 import numpy as np
 
-cluster = MongoClient(
-    "mongodb+srv://cgallivan:P%40perless2020@cluster0.r1pdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
 db = cluster["tokens"]
 collection = db["token-metadata"]
 
