@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask import request
 import pymongo
@@ -6,6 +7,7 @@ import json
 from bson import json_util
 import pandas as pd
 import numpy as np
+from src.routes.default_route import default_route
 from src.routes.token_metadata import token_metadata
 from src.routes.token_timeseries import token_timeseries
 from src.routes.token_top_snapshot import token_top_snapshot
@@ -15,6 +17,7 @@ from src.routes.users import users
 
 app = Flask(__name__)
 
+app.register_blueprint(default_route)
 app.register_blueprint(token_metadata)
 app.register_blueprint(token_timeseries)
 app.register_blueprint(token_top_snapshot)
@@ -23,5 +26,11 @@ app.register_blueprint(token_filters)
 app.register_blueprint(users)
 
 
+# if os.environ.get('FLASK_ENV') == 'production':
+#     if __name__ == '__main__':
+#         app.run(debug=False)
+# else:
+#     if __name__ == "__main__":
+#         app.run(debug=True, port=5000, host="0.0.0.0")
 if __name__ == "__main__":
-    app.run(debug=True, port=6000, host="0.0.0.0")
+    app.run(debug=True, port=5000, host="0.0.0.0")
