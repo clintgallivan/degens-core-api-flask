@@ -1,5 +1,5 @@
 from flask import Blueprint
-from ...schedulers.token_filters_scheduler import get_token_filters_and_post_concurrently
+from ...schedulers.functions.get_token_filters import get_token_filters_and_post_concurrently
 
 import datetime as dt
 import pytz

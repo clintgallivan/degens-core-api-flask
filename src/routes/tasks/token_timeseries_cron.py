@@ -1,5 +1,5 @@
 from flask import Blueprint
-from ...schedulers.token_timestamp_scheduler import get_token_timestamp_and_post_concurrently, get_token_list
+from ...schedulers.functions.get_token_timestamp import get_token_timestamp_and_post_concurrently, get_token_list
 
 import datetime as dt
 import pytz
