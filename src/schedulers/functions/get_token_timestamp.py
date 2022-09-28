@@ -226,8 +226,8 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
 # # from datetime import date
 # # import datetime as dt
 # # import pytz
-coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
-mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+# coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+# mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 # logs = []
 

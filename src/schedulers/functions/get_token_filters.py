@@ -40,7 +40,6 @@ def post_to_db(ds):
     headers = {'Content-type': 'application/json'}
     r = requests.post(f'{mongo_base_url}/token-filters',
                       data=ds, headers=headers)
-    # print(r.content)
 
 
 def get_token_filters_and_post_concurrently():
