@@ -15,32 +15,29 @@ sched = BlockingScheduler()
 # * timeseries scheduler
 
 
-@sched.scheduled_job('interval', start_date='2022-09-27 15:00:00', days=1, misfire_grace_time=10000)
+@sched.scheduled_job('interval', seconds=3, misfire_grace_time=10000)
 def function():
-    print('Token Timestamp Scheduler Started')
-    get_token_timestamp_and_post_concurrently(token_id_list)
-    print(
-        f'Token Timestamp Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
+    print('Fake cron started')
 
-# * top snapshot scheduler
+# # * top snapshot scheduler
 
 
-@sched.scheduled_job('interval', start_date='2022-09-28 05:00:00', days=1, misfire_grace_time=10000)
-def function():
-    print('Token Snapshot Scheduler Started')
-    get_top_token_snapshot_and_post_concurrently()
-    print(
-        f'Token Snapshot Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
+# @sched.scheduled_job('interval', start_date='2022-09-28 05:00:00', days=1, misfire_grace_time=10000)
+# def function():
+#     print('Token Snapshot Scheduler Started')
+#     get_top_token_snapshot_and_post_concurrently()
+#     print(
+#         f'Token Snapshot Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
 
-# * token filters scheduler
+# # * token filters scheduler
 
 
-@sched.scheduled_job('interval', start_date='2022-09-27 14:50:00', days=1, misfire_grace_time=10000)
-def function():
-    print('Token Filters Scheduler Started')
-    get_token_filters_and_post_concurrently()
-    print(
-        f'Token Filters Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
+# @sched.scheduled_job('interval', start_date='2022-09-27 14:50:00', days=1, misfire_grace_time=10000)
+# def function():
+#     print('Token Filters Scheduler Started')
+#     get_token_filters_and_post_concurrently()
+#     print(
+#         f'Token Filters Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
 
 
 sched.start()
