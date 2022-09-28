@@ -23,14 +23,14 @@
 
 import apscheduler
 import time
-import caffeine
+# import caffeine
 from apscheduler.schedulers.blocking import BlockingScheduler
 from functions.get_token_timestamp import get_token_list, get_token_timestamp_and_post_concurrently
 import datetime as dt
 import pytz
 
-caffeine.on(display=False)
-token_id_list = get_token_list()
+# caffeine.on(display=False)
+# token_id_list = get_token_list()
 
 
 sched = BlockingScheduler()

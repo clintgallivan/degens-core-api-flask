@@ -1,11 +1,11 @@
 import apscheduler
-import caffeine
+# import caffeine
 from apscheduler.schedulers.blocking import BlockingScheduler
 from functions.batch_update_user_leaderboards import batch_update_user_leaderboards
 import datetime as dt
 import pytz
 
-caffeine.on(display=False)
+# caffeine.on(display=False)
 
 sched = BlockingScheduler()
 
