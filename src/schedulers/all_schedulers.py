@@ -15,7 +15,7 @@ sched = BlockingScheduler()
 # * timeseries scheduler
 
 
-@sched.scheduled_job('interval', minutes=1, misfire_grace_time=10000)
+@sched.scheduled_job('interval', seconds=3, misfire_grace_time=10000)
 def function():
     print('Fake cron started')
 
