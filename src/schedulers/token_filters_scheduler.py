@@ -3,14 +3,14 @@
 
 import apscheduler
 import time
-import caffeine
+# import caffeine
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 from functions.get_token_filters import get_token_filters_and_post_concurrently
 import datetime as dt
 import pytz
 
-caffeine.on(display=False)
+# caffeine.on(display=False)
 
 
 sched = BlockingScheduler()
