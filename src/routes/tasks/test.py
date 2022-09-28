@@ -9,6 +9,6 @@ test_route = Blueprint('test_route', __name__,
 @test_route.route("/tasks/test/<dur>", methods=["GET"])
 def get_test_route(dur):
     print(f'sleeping for {dur} seconds')
-    time.sleep(dur)
+    time.sleep(int(dur))
     print('finished sleeping')
     return 'Test task successful'

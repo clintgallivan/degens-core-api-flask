@@ -10,7 +10,7 @@ import numpy as np
 import datetime as dt
 import pytz
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 collection = db["token-filters"]
 
