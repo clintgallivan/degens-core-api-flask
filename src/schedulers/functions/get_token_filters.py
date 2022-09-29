@@ -38,7 +38,8 @@ def build_output():
         'categories': get_categories_api(),
         'platforms': get_platforms_api(),
     }
-    return json.dumps(output)
+    # return json.dumps(output)
+    return output
 
 
 def post_to_db(ds):
