@@ -7,6 +7,11 @@ import numpy as np
 import time
 import random
 import json
+from pymongo import MongoClient
+
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'), connect=False)
+db = cluster["tokens"]
+collection = db["token-filters"]
 
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
@@ -38,8 +43,12 @@ def build_output():
 
 def post_to_db(ds):
     headers = {'Content-type': 'application/json'}
-    r = requests.post(f'{mongo_base_url}/token-filters',
-                      data=ds, headers=headers)
+    collection.delete_many({})
+    collection.insert_one(ds)
+# def post_to_db(ds):
+#     headers = {'Content-type': 'application/json'}
+#     r = requests.post(f'{mongo_base_url}/token-filters',
+#                       data=ds, headers=headers)
 
 
 def get_token_filters_and_post_concurrently():
