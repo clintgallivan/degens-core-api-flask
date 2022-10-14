@@ -23,14 +23,3 @@ def get_token_snapshot():
     if request.method == 'GET':
         all_top_tokens = list(collection.find({}))
         return json.dumps(all_top_tokens, default=json_util.default)
-    else:
-        html_output = ''
-        request_payload = request.json
-        # print(request_payload)
-        document = request_payload
-        print(document)
-        timestamp = dt.datetime.now(pytz.utc)
-        collection.delete_many({})
-        collection.insert_one(document)
-        html_output = f"Daily Token snapshot document was inserted!"
-    return html_output

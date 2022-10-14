@@ -7,9 +7,17 @@ import numpy as np
 import time
 import random
 import json
+import datetime as dt
+import pytz
+from pymongo import MongoClient
 # from datetime import date
 # import datetime as dt
 # import pytz
+
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+db = cluster["tokens"]
+collection = db["token-timeseries"]
+
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
@@ -132,6 +140,7 @@ def get_token_timestamp_data(token_id):
                     time.sleep(2)
                     continue
                 elif i >= 1:
+                    value = 'failure'
                     print(f"{token_id} not found, moving on...", e)
             else:
                 if i < tryCount - 2:
@@ -166,7 +175,7 @@ def get_token_timestamp_data(token_id):
                 print(f"Aborting Script, failed on id: '{token_id}'", e)
                 raise
         break
-    return [value, json.dumps(ds), json.dumps(ds_meta)]
+    return [value, ds, ds_meta]
 
 
 def check_if_value(result_key):
@@ -177,15 +186,89 @@ def check_if_value(result_key):
 
 
 def post_to_db(ds):
-    headers = {'Content-type': 'application/json'}
-    r = requests.post(f'{mongo_base_url}/token-timeseries',
-                      data=ds, headers=headers)
+    # headers = {'Content-type': 'application/json'}
+    # r = requests.post(f'{mongo_base_url}/token-timeseries',
+    #                   data=ds, headers=headers)
+    token = ds
+    timestamp = dt.datetime.now(pytz.utc)
+    existing_token = collection.find(
+        {"coingecko_id": token["coingecko_id"]})
+    existing_token_exists = collection.count_documents(
+        {"coingecko_id": token["coingecko_id"]})
+    if existing_token_exists > 0:
+        for token_document in existing_token:
+            collection.update_one(
+                {'coingecko_id': token["coingecko_id"]},
+                {"$push": {
+                    "historical": {
+                        "$each": [
+                            {
+                                "timestamp": timestamp,
+                                "price": token["price"],
+                                "market_cap": token["market_cap"],
+                                "market_cap_rank": token["market_cap_rank"],
+                                "coingecko_rank": token["coingecko_rank"],
+                                "coingecko_score": token["coingecko_score"],
+                                "dev_score": token["dev_score"],
+                                "community_score": token["community_score"],
+                                "liquidity_score": token["liquidity_score"],
+                                "public_interest_score": token["public_interest_score"],
+                                "community_data": token["community_data"],
+                                "developer_data": token["developer_data"],
+                                "degen_rank": None,
+                                "dev_rank": None,
+                                "community_rank": None,
+                                "liquidity_rank": None
+                            }
+                        ],
+                        "$position": 0
+                    }
+                }}
+            )
+    else:
+        collection.insert_one(
+            {
+                "coingecko_id": token["coingecko_id"],
+                "symbol": token["symbol"],
+                "name": token["name"],
+                "historical": [{
+                    "timestamp": timestamp,
+                    "price": token["price"],
+                    "market_cap": token["market_cap"],
+                    "market_cap_rank": token["market_cap_rank"],
+                    "coingecko_rank": token["coingecko_rank"],
+                    "coingecko_score": token["coingecko_score"],
+                    "dev_score": token["dev_score"],
+                    "community_score": token["community_score"],
+                    "liquidity_score": token["liquidity_score"],
+                    "public_interest_score": token["public_interest_score"],
+                    "community_data": token["community_data"],
+                    "developer_data": token["developer_data"]
+                }]
+            }
+        )
 
 
 def post_to_meta_db(ds):
-    headers = {'Content-type': 'application/json'}
-    r = requests.post(f'{mongo_base_url}/update-token',
-                      data=ds, headers=headers)
+    # headers = {'Content-type': 'application/json'}
+    # r = requests.post(f'{mongo_base_url}/update-token',
+    #                   data=ds, headers=headers)
+    token = ds
+    existing_token = collection.find(
+        {"coingecko_id": token["coingecko_id"]})
+    existing_token_exists = collection.count_documents(
+        {"coingecko_id": token["coingecko_id"]})
+    if existing_token_exists > 0:
+        for token_document in existing_token:
+            # print(token_document)
+            collection.find_one_and_update({"coingecko_id": token["coingecko_id"]}, {"$set": {
+                                           "coingecko_id": token["coingecko_id"], "symbol": token["symbol"],    "name": token["name"], "platforms": token["platforms"],   "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site":    token["blockchain_site"], "discord": token["discord"], "medium":    token["medium"], "twitter": token["twitter"], "telegram": token["telegram"], "reddit": token["reddit"], "github": token["github"],    "image": token["image"], "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent":     token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank": token["coingecko_rank"],   "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"],     "liquidity_score": token["liquidity_score"],    "public_interest_score": token["public_interest_score"]}},    upsert=True)
+            html_output = f"Token with coingecko_id: {token['coingecko_id']}, was updated!"
+        else:
+            collection.insert_one(
+                {"coingecko_id": token["coingecko_id"], "symbol": token["symbol"], "name": token["name"],     "platforms": token["platforms"], "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site": token["blockchain_site"],    "discord": token["discord"], "medium": token["medium"], "twitter": token["twitter"], "telegram":    token["telegram"], "reddit": token["reddit"], "github": token["github"], "image": token["image"],    "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent": token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank":     token["coingecko_rank"], "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"], "liquidity_score": token["liquidity_score"], "public_interest_score": token["public_interest_score"]})
+            html_output = f"Token with coingecko_id did not exist. Created new token with coingecko_id: {token    ['coingecko_id']}!"
+        return html_output
 
 
 def get_token_timestamp_and_post_concurrently(token_id_list):
@@ -200,7 +283,6 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
         if ds[0] == 'failure':
             print(ds)
             print('not posting object to db')
-            return
         else:
             print(ds)
             print('posting to db')
@@ -208,164 +290,5 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
             post_to_meta_db(ds[2])
             print('posted')
         time.sleep(1.4)
-    print(logs)
-    # logs = ''
+    print('====Done Posting Token Timestamp Data to Db====')
     return
-
-
-# * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-
-# # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)
-# import os
-# import requests
-# import pandas as pd
-# import numpy as np
-# import time
-# import random
-# import json
-# # from datetime import date
-# # import datetime as dt
-# # import pytz
-# coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
-# mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
-
-# logs = []
-
-
-# def get_token_list():
-#     output = []
-#     r = requests.get(f'{coingecko_base_url}/coins/list')
-#     for token_object in r.json():
-#         output.append(token_object['id'])
-#     return output
-
-
-# def get_token_timestamp_data(token_id):
-#     print('beginning object build')
-#     ds = {}
-#     value = 'success'
-#     tryCount = 6
-#     waitTime = 5
-#     for i in range(tryCount):
-#         try:
-#             r = requests.get(
-#                 f'{coingecko_base_url}/coins/{token_id}', timeout=waitTime)
-#             # print(r)
-#             r.raise_for_status()
-
-#             result = r.json()
-#             ds["coingecko_id"] = result.get('id', '')
-#             ds["symbol"] = result.get('symbol', '')
-#             ds["name"] = result.get("name", '')
-#             ds["price"] = result.get('market_data', {}).get(
-#                 'current_price', {}).get('usd', '')
-#             ds["market_cap"] = result.get('market_data', {}).get(
-#                 'market_cap', {}).get('usd', '')
-#             ds["market_cap_rank"] = result.get("market_cap_rank", '')
-#             ds["coingecko_rank"] = result.get("coingecko_rank", '')
-#             ds["coingecko_score"] = result.get("coingecko_score", '')
-#             ds["dev_score"] = result.get("developer_score", '')
-#             ds["community_score"] = result.get("community_score", '')
-#             ds["liquidity_score"] = result.get("liquidity_score", '')
-#             ds["public_interest_score"] = result.get(
-#                 "public_interest_score", '')
-#             ds["community_data"] = result.get("community_data", {})
-#             ds["developer_data"] = result.get("developer_data", {})
-#             print('object caputured')
-
-#         except requests.exceptions.Timeout as e:
-#             if i < tryCount - 2:
-#                 print('Timeout error, trying again...', e)
-#                 time.sleep(2)
-#                 continue
-#             elif i < tryCount - 1:
-#                 print('Timeout error, trying once more...', e)
-#                 time.sleep(5)
-#                 waitTime = 63
-#                 continue
-#             else:
-#                 value = 'failure'
-#                 print(f"Aborting Script, failed on id: '{token_id}'", e)
-#                 raise
-#         except requests.exceptions.HTTPError as e:
-#             code = e.response.status_code
-#             if code in [404]:
-#                 if i < 1:
-#                     print(f"{token_id} not found...", e)
-#                     time.sleep(2)
-#                     continue
-#                 elif i >= 1:
-#                     print(f"{token_id} not found, moving on...", e)
-#             else:
-#                 if i < tryCount - 2:
-#                     print("Failure, trying again...", e)
-#                     time.sleep(2)
-#                     continue
-#                 elif i < tryCount - 1:
-#                     print('Timeout error', e)
-#                     print("Failure, trying last time...", e)
-#                     time.sleep(5)
-#                     continue
-#                 else:
-#                     value = 'failure'
-#                     print(f"Aborting Script, failed on id: '{token_id}';", e)
-#                     raise
-#         except requests.exceptions.ConnectionError as e:
-#             if i < tryCount - 3:
-#                 print('Connection Error, trying again...', e)
-#                 time.sleep(.01)
-#                 continue
-#             if i < tryCount - 2:
-#                 print('Connection Error, trying again...', e)
-#                 time.sleep(2)
-#                 continue
-#             elif i < tryCount - 1:
-#                 print('Connection Error, trying once more...', e)
-#                 time.sleep(5)
-#                 waitTime = 63
-#                 continue
-#             else:
-#                 value = 'failure'
-#                 print(f"Aborting Script, failed on id: '{token_id}'", e)
-#                 raise
-#         break
-#     return [value, json.dumps(ds)]
-
-
-# def post_to_db(ds):
-#     headers = {'Content-type': 'application/json'}
-#     r = requests.post(f'{mongo_base_url}/token-timeseries',
-#                       data=ds, headers=headers)
-
-# def post_to_meta_db(ds):
-#     headers = {'Content-type': 'application/json'}
-#     r = requests.post(f'{mongo_base_url}/update-token',
-#                       data=ds, headers=headers)
-
-
-# def get_token_timestamp_and_post_concurrently(token_id_list):
-#     # timestamp = date.today().strftime("%m-%d-%YT%H:%M:%S")
-#     # timestamp = dt.datetime.now(pytz.utc)
-#     # logs = []
-#     print('beginning loop through token list')
-#     for token_id in token_id_list:
-
-#         ds = get_token_timestamp_data(token_id)
-#         # print(ds)
-#         if ds[0] == 'failure':
-#             print(ds)
-#             print('not posting object to db')
-#             return
-#         else:
-#             print(ds)
-#             print('posting to db')
-#             post_to_db(ds[1])
-#             post_to_meta_db(ds[1])
-#             print('posted')
-#         time.sleep(1.4)
-#     print(logs)
-#     # logs = ''
-#     return
-
-
-# # * Run once a day to update token timestamp - call get_token_timestamp_and_post_concurrently(token_id_list)

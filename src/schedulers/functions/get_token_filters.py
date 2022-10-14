@@ -38,18 +38,12 @@ def build_output():
         'categories': get_categories_api(),
         'platforms': get_platforms_api(),
     }
-    # return json.dumps(output)
     return output
 
 
 def post_to_db(ds):
-    headers = {'Content-type': 'application/json'}
     collection.delete_many({})
     collection.insert_one(ds)
-# def post_to_db(ds):
-#     headers = {'Content-type': 'application/json'}
-#     r = requests.post(f'{mongo_base_url}/token-filters',
-#                       data=ds, headers=headers)
 
 
 def get_token_filters_and_post_concurrently():
