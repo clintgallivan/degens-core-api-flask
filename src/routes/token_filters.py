@@ -23,14 +23,3 @@ def get_token_filters():
     if request.method == 'GET':
         token_filters = list(collection.find({}))
         return json.dumps(token_filters, default=json_util.default)
-    else:
-        html_output = ''
-        request_payload = request.json
-        # print(request_payload)
-        document = request_payload
-        print(document)
-        timestamp = dt.datetime.now(pytz.utc)
-        collection.delete_many({})
-        collection.insert_one(document)
-        html_output = f"Token Filters was inserted!"
-    return html_output

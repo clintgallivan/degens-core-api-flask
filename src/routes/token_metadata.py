@@ -37,6 +37,7 @@ def update_token():
     request_payload = request.json
     token = request_payload
     print(len(token))
+    # ! a.1 delete
     if len(token) > 13000:
         for idx, i in enumerate(request_payload):
             print({idx: idx})
@@ -52,6 +53,7 @@ def update_token():
         print('=======done doing that ======')
         return 'Post was successful'
     else:
+        # ! a.1 delete
         existing_token = collection.find(
             {"coingecko_id": token["coingecko_id"]})
         existing_token_exists = collection.count_documents(
