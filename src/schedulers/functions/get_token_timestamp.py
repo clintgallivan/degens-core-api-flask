@@ -143,14 +143,17 @@ def get_token_timestamp_data(token_id):
                     value = 'failure'
                     print(f"{token_id} not found, moving on...", e)
             else:
-                if i < tryCount - 2:
+                if i < tryCount - 3:
                     print("Failure, trying again...", e)
                     time.sleep(2)
                     continue
-                elif i < tryCount - 1:
-                    print('Timeout error', e)
-                    print("Failure, trying last time...", e)
+                elif i < tryCount - 2:
+                    print("Failure, trying again with longer wait time...", e)
                     time.sleep(5)
+                    continue
+                elif i < tryCount - 1:
+                    print("Failure, trying again with 2 minute wait time delay", e)
+                    time.sleep(120)
                     continue
                 else:
                     value = 'failure'
