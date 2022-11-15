@@ -16,7 +16,7 @@ from pymongo import MongoClient
 
 cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
 db = cluster["tokens"]
-collection = db["token-timeseries"]
+# collection = db["token-timeseries"]
 
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
@@ -189,6 +189,7 @@ def check_if_value(result_key):
 
 
 def post_to_db(ds):
+    collection = db["token-timeseries"]
     # headers = {'Content-type': 'application/json'}
     # r = requests.post(f'{mongo_base_url}/token-timeseries',
     #                   data=ds, headers=headers)
@@ -253,6 +254,7 @@ def post_to_db(ds):
 
 
 def post_to_meta_db(ds):
+    collection = db["token-metadata"]
     # headers = {'Content-type': 'application/json'}
     # r = requests.post(f'{mongo_base_url}/update-token',
     #                   data=ds, headers=headers)
@@ -267,11 +269,11 @@ def post_to_meta_db(ds):
             collection.find_one_and_update({"coingecko_id": token["coingecko_id"]}, {"$set": {
                                            "coingecko_id": token["coingecko_id"], "symbol": token["symbol"],    "name": token["name"], "platforms": token["platforms"],   "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site":    token["blockchain_site"], "discord": token["discord"], "medium":    token["medium"], "twitter": token["twitter"], "telegram": token["telegram"], "reddit": token["reddit"], "github": token["github"],    "image": token["image"], "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent":     token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank": token["coingecko_rank"],   "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"],     "liquidity_score": token["liquidity_score"],    "public_interest_score": token["public_interest_score"]}},    upsert=True)
             html_output = f"Token with coingecko_id: {token['coingecko_id']}, was updated!"
-        else:
-            collection.insert_one(
-                {"coingecko_id": token["coingecko_id"], "symbol": token["symbol"], "name": token["name"],     "platforms": token["platforms"], "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site": token["blockchain_site"],    "discord": token["discord"], "medium": token["medium"], "twitter": token["twitter"], "telegram":    token["telegram"], "reddit": token["reddit"], "github": token["github"], "image": token["image"],    "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent": token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank":     token["coingecko_rank"], "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"], "liquidity_score": token["liquidity_score"], "public_interest_score": token["public_interest_score"]})
-            html_output = f"Token with coingecko_id did not exist. Created new token with coingecko_id: {token    ['coingecko_id']}!"
-        return html_output
+    else:
+        collection.insert_one(
+            {"coingecko_id": token["coingecko_id"], "symbol": token["symbol"], "name": token["name"],     "platforms": token["platforms"], "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site": token["blockchain_site"],    "discord": token["discord"], "medium": token["medium"], "twitter": token["twitter"], "telegram":    token["telegram"], "reddit": token["reddit"], "github": token["github"], "image": token["image"],    "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent": token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank":     token["coingecko_rank"], "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"], "liquidity_score": token["liquidity_score"], "public_interest_score": token["public_interest_score"]})
+        html_output = f"Token with coingecko_id did not exist. Created new token with coingecko_id: {token    ['coingecko_id']}!"
+    return html_output
 
 
 def get_token_timestamp_and_post_concurrently(token_id_list):
