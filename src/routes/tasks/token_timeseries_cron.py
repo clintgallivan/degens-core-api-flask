@@ -29,5 +29,4 @@ def get_token_timeseries_cron():
     # get_token_timestamp_and_post_concurrently(token_id_list)
     print(
         f'Token Timestamp Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
-
     return 'Token timeseries cron successful'
