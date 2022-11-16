@@ -152,7 +152,7 @@ def get_token_timestamp_data(token_id):
                     time.sleep(5)
                     continue
                 elif i < tryCount - 1:
-                    print("Failure, trying again with 2 minute wait time delay", e)
+                    print("Failure, trying again with 10 minute wait time delay", e)
                     time.sleep(120)
                     continue
                 else:
@@ -288,12 +288,14 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
         if ds[0] == 'failure':
             print(ds)
             print('not posting object to db')
+            time.sleep(1.4)
         else:
             print(ds)
             print('posting to db')
             post_to_db(ds[1])
+            time.sleep(1)
             post_to_meta_db(ds[2])
             print('posted')
-        time.sleep(1.4)
+            time.sleep(1.4)
     print('====Done Posting Token Timestamp Data to Db====')
     return
