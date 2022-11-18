@@ -25,6 +25,7 @@ logs = []
 
 
 def get_token_list():
+    print('getting token list')
     output = []
     r = requests.get(f'{coingecko_base_url}/coins/list')
     for token_object in r.json():
