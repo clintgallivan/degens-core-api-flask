@@ -14,7 +14,7 @@ from pymongo import MongoClient
 # import datetime as dt
 # import pytz
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'), connection=False)
 db = cluster["tokens"]
 # collection = db["token-timeseries"]
 
