@@ -289,16 +289,17 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
         ds = get_token_timestamp_data(token_id)
         # print(ds)
         if ds[0] == 'failure':
-            print(ds)
+            print(ds[0], {'coingecko_id': ds[1]['coingecko_id']}, {'symbol': ds[1]['symbol']})
             print('not posting object to db')
-            time.sleep(1.4)
+            time.sleep(2)
         else:
-            print(ds)
+            # print(ds)
+            print(ds[0], {'coingecko_id': ds[1]['coingecko_id']}, {'symbol': ds[1]['symbol']})
             print('posting to db')
             post_to_db(ds[1])
             time.sleep(1)
             post_to_meta_db(ds[2])
             print('posted')
-            time.sleep(1.4)
+            time.sleep(2)
     print('====Done Posting Token Timestamp Data to Db====')
     return
