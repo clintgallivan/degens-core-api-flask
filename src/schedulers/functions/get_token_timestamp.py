@@ -144,6 +144,9 @@ def get_token_timestamp_data(token_id):
                     continue
                 elif i >= 1:
                     value = 'failure'
+                    ds = {'coingecko_id': token_id}
+                    ds_meta = {'coingecko_id': token_id}
+                    
                     print(f"{token_id} not found, moving on...", e)
             else:
                 if i < tryCount - 3:
@@ -258,9 +261,6 @@ def post_to_db(ds):
 
 def post_to_meta_db(ds):
     collection = db["token-metadata"]
-    # headers = {'Content-type': 'application/json'}
-    # r = requests.post(f'{mongo_base_url}/update-token',
-    #                   data=ds, headers=headers)
     token = ds
     existing_token = collection.find(
         {"coingecko_id": token["coingecko_id"]})
@@ -268,7 +268,6 @@ def post_to_meta_db(ds):
         {"coingecko_id": token["coingecko_id"]})
     if existing_token_exists > 0:
         for token_document in existing_token:
-            # print(token_document)
             collection.find_one_and_update({"coingecko_id": token["coingecko_id"]}, {"$set": {
                                            "coingecko_id": token["coingecko_id"], "symbol": token["symbol"],    "name": token["name"], "platforms": token["platforms"],   "categories": token["categories"], "description": token["description"], "homepage": token["homepage"], "blockchain_site":    token["blockchain_site"], "discord": token["discord"], "medium":    token["medium"], "twitter": token["twitter"], "telegram": token["telegram"], "reddit": token["reddit"], "github": token["github"],    "image": token["image"], "contract_address": token["contract_address"], "sentiment_votes_up_percent": token["sentiment_votes_up_percent"], "sentiment_votes_down_percent":     token["sentiment_votes_down_percent"], "market_cap_rank": token["market_cap_rank"], "coingecko_rank": token["coingecko_rank"],   "coingecko_score": token["coingecko_score"], "dev_score": token["dev_score"], "community_score": token["community_score"],     "liquidity_score": token["liquidity_score"],    "public_interest_score": token["public_interest_score"]}},    upsert=True)
             html_output = f"Token with coingecko_id: {token['coingecko_id']}, was updated!"
@@ -280,16 +279,13 @@ def post_to_meta_db(ds):
 
 
 def get_token_timestamp_and_post_concurrently(token_id_list):
-    # timestamp = date.today().strftime("%m-%d-%YT%H:%M:%S")
-    # timestamp = dt.datetime.now(pytz.utc)
-    # logs = []
     print('beginning loop through token list')
     for token_id in token_id_list:
 
         ds = get_token_timestamp_data(token_id)
         # print(ds)
         if ds[0] == 'failure':
-            print(ds[0], {'coingecko_id': ds[1]['coingecko_id']}, {'symbol': ds[1]['symbol']})
+            print(ds[0], {'coingecko_id': ds[1]['coingecko_id']})
             print('not posting object to db')
             time.sleep(2)
         else:
