@@ -205,25 +205,13 @@ def post_to_update_timeseries_db(ds):
                 print(f'Posted {idx} of {len(token_arr)} to token-timeseries collection')
             except BulkWriteError as bwe:
                 print(bwe.details)
-            requests = []   
+            requests = []
+    try:
+        collection.bulk_write(requests, ordered=False)
+        print(f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
+    except BulkWriteError as bwe:
+        print(bwe.details) 
     print('Finished posting token top snapshot to token-timeseries collection')
-# def post_to_update_timeseries_db(ds):
-#     collection = db["token-timeseries"]
-#     token_arr = json.loads(ds)
-#     print('begin post')
-#     for idx, i in enumerate(token_arr):
-#         print(
-#             f'Posted {idx} of {len(token_arr)} to token-timeseries collection')
-#         collection.update_one(
-#             {'coingecko_id': i["coingecko_id"]},
-#             {"$set": {
-#                 "historical.0.degen_rank": i['degen_rank'],
-#                 "historical.0.dev_rank": i['dev_rank'],
-#                 "historical.0.community_rank": i['community_rank'],
-#                 "historical.0.liquidity_rank": i['liquidity_rank'],
-#             }}
-#         )
-#     print('Finished posting token top snapshot to token-timeseries collection')
 
 def post_to_update_metadata_db(ds):
     count = 0
@@ -238,36 +226,22 @@ def post_to_update_metadata_db(ds):
             count = 0
             try:
                 collection.bulk_write(requests, ordered=False)
-                print(f'Posted {idx} of {len(token_arr)} to token-timeseries collection')
+                print(f'Posted {idx} of {len(token_arr)} to token-metadata collection')
             except BulkWriteError as bwe:
                 print(bwe.details)
             requests = []
-    print('Finished posting token top snapshot to token-timeseries collection')
-# def post_to_update_metadata_db(ds):
-#     collection = db["token-metadata"]
-#     token_arr = json.loads(ds)
-#     print('begin post')
-#     for idx, i in enumerate(token_arr):
-#         print(f'Posted {idx} of {len(token_arr)} to token-metadata collection')
-#         collection.update_one(
-#             {'coingecko_id': i["coingecko_id"]},
-#             {"$set": {
-#                 "degen_rank": i['degen_rank'],
-#                 "dev_rank": i['dev_rank'],
-#                 "community_rank": i['community_rank'],
-#                 "liquidity_rank": i['liquidity_rank'],
-#             }}
-#         )
-#     print('Finished posting token top snapshot to token-metadata collection')
-
+    try:
+        collection.bulk_write(requests, ordered=False)
+        print(f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
+    except BulkWriteError as bwe:
+        print(bwe.details)
+    print('Finished posting token top snapshot to token-metadata collection')
 
 def get_top_token_snapshot_and_post_concurrently():
     print('beginning parse through token list')
     table = get_token_current_metadata()
     print('posting to db')
     post_to_snapshot_db(reduce_timeseries_data(table))
-    # * comment in these two lines below
-    post_to_update_timeseries_db(data_reducer(table))
     post_to_update_metadata_db(data_reducer(table))
+    post_to_update_timeseries_db(data_reducer(table))
     print('finished all token top snapshot updates. Cron finished.')
-
