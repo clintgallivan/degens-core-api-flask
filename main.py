@@ -18,7 +18,7 @@ from src.routes.tasks.test import test_route
 from src.routes.tasks.token_timeseries_cron import token_timeseries_cron
 from src.routes.tasks.token_top_snapshot_cron import token_top_snapshot_cron
 from src.routes.tasks.token_filters_cron import token_filters_cron
-
+from src.routes.tasks.batch_update_user_leaderboards_cron import batch_update_user_leaderboards_cron
 
 app = Flask(__name__)
 
@@ -33,6 +33,7 @@ app.register_blueprint(test_route)
 app.register_blueprint(token_timeseries_cron)
 app.register_blueprint(token_top_snapshot_cron)
 app.register_blueprint(token_filters_cron)
+app.register_blueprint(batch_update_user_leaderboards_cron)
 
 
 # if os.environ.get('FLASK_ENV') == 'production':

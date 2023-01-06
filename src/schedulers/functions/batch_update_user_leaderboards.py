@@ -7,11 +7,17 @@ import numpy as np
 import time
 import random
 import json
+from bson import json_util
 from datetime import datetime, timedelta
+from pymongo import MongoClient, UpdateOne
 import pytz
 import copy
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+
+cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+db = cluster["tokens"]
+collection = db["users"]
 
 now = datetime.now(pytz.utc)
 new_user_data = []
@@ -19,8 +25,13 @@ new_user_data = []
 
 def get_user_info():
     params = {'cron': 'true'}
-    r = requests.get(f'{mongo_base_url}/users', params=params)
-    return r.json()
+    keys_to_include = {}
+    if params.get('cron'):
+        keys_to_include = {
+            "uid": 1, "portfolio_metadata": 1, "historical.portfolios.season_1": {'$slice': 1}, "historical.portfolios.all_time": {'$slice': 1}}
+    all_users = list(collection.find(
+        {}, keys_to_include))
+    return all_users
 
 
 def create_token_list_to_update(user_info):
@@ -47,7 +58,6 @@ def get_current_prices(token_list):
         for i in r.json():
             output[i['id']] = {
                 'current_price': i['current_price'], 'mcap_rank': i['market_cap_rank']}
-
     return output
 
 
@@ -96,25 +106,14 @@ def run_calcs_and_update_user(user_info, current_prices):
                     timespec='seconds').replace('+00:00', 'Z')
 
             def update_avg_mcap_rank():
-                og_prev = user_original['historical']['portfolios'][portfolio][0]['timestamp']['$date']
-                og_crea = user_original['portfolio_metadata'][portfolio]['creation_date']['$date']
+                og_prev = user_original['historical']['portfolios'][portfolio][0]['timestamp'].replace(
+                    tzinfo=pytz.UTC)
+                og_crea = user_original['portfolio_metadata'][portfolio]['creation_date'].replace(
+                    tzinfo=pytz.UTC)
 
-                if '.' not in og_prev:
-                    og_prev = og_prev[0:og_prev.index('Z')] + '.000Z'
-                if '.' not in og_crea:
-                    og_crea = og_crea[0:og_crea.index('Z')] + '.000Z'
-
-                previous_timestamp = datetime.strptime(
-                    str(og_prev), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=pytz.UTC)
-
-                creation_timestamp = datetime.strptime(
-                    str(og_crea), '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=pytz.UTC)
-
-                previous_timestamp
-
-                current_period_duration = now - previous_timestamp
-                previous_period_duration = previous_timestamp - creation_timestamp
-                total_duration = now - creation_timestamp
+                previous_period_duration = og_prev - og_crea
+                current_period_duration = now - og_prev
+                total_duration = now - og_crea
 
                 current_period_total_weight = current_period_duration/total_duration
                 previous_period_total_weight = previous_period_duration/total_duration
@@ -147,12 +146,31 @@ def run_calcs_and_update_user(user_info, current_prices):
 
 
 def post_to_db():
-    headers = {'Content-type': 'application/json'}
+    count = 0
     batchsize = 100
     for i in range(0, len(new_user_data), batchsize):
         batch = new_user_data[i:i+batchsize]
-        r = requests.post(f'{mongo_base_url}/users',
-                          data=json.dumps(batch), headers=headers)
+        bulk_requests = []
+        for user in batch:
+            count = count + 1
+            portfolio_to_push = {}
+            for key in user['historical']['portfolios']:
+                def str_to_datetime(timestamp_as_str):
+                    return datetime.strptime(timestamp_as_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
+                user['historical']['portfolios'][f'{key}'][0]['timestamp'] = str_to_datetime(
+                    user['historical']['portfolios'][f'{key}'][0]['timestamp'])
+                portfolio_to_push[f'historical.portfolios.{key}'] = {
+                    '$each': [
+                        user['historical']['portfolios'][f'{key}'][0],
+                    ],
+                    '$position': 0
+                }
+            bulk_requests.append(UpdateOne({'uid': user['uid']}, {
+                '$push': portfolio_to_push
+            }))
+        collection.bulk_write(bulk_requests)
+        print(f'{count} users were updated!')
+        time.sleep(1)
 
 
 def batch_update_user_leaderboards():

@@ -29,32 +29,32 @@ def get_users():
         all_users = list(collection.find(
             {}, keys_to_include))
         return json.dumps(all_users, default=json_util.default)
-    else:
-        html_output = ''
-        count = 0
-        request_payload = request.json
-        bulk_requests = []
-        for user in request_payload:
-            count = count + 1
-            portfolio_to_push = {
-            }
-            for key in user['historical']['portfolios']:
-                def str_to_datetime(timestamp_as_str):
-                    return datetime.strptime(timestamp_as_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
-                user['historical']['portfolios'][f'{key}'][0]['timestamp'] = str_to_datetime(
-                    user['historical']['portfolios'][f'{key}'][0]['timestamp'])
-                portfolio_to_push[f'historical.portfolios.{key}'] = {
-                    '$each': [
-                        user['historical']['portfolios'][f'{key}'][0],
-                    ],
-                    '$position': 0
-                }
-            bulk_requests.append(UpdateOne({'uid': user['uid']}, {
-                '$push': portfolio_to_push
-            }))
-        collection.bulk_write(bulk_requests)
-        html_output = f'{count} users were updated!'
-        return html_output
+    # else:
+    #     html_output = ''
+    #     count = 0
+    #     request_payload = request.json
+    #     bulk_requests = []
+    #     for user in request_payload:
+    #         count = count + 1
+    #         portfolio_to_push = {
+    #         }
+    #         for key in user['historical']['portfolios']:
+    #             def str_to_datetime(timestamp_as_str):
+    #                 return datetime.strptime(timestamp_as_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
+    #             user['historical']['portfolios'][f'{key}'][0]['timestamp'] = str_to_datetime(
+    #                 user['historical']['portfolios'][f'{key}'][0]['timestamp'])
+    #             portfolio_to_push[f'historical.portfolios.{key}'] = {
+    #                 '$each': [
+    #                     user['historical']['portfolios'][f'{key}'][0],
+    #                 ],
+    #                 '$position': 0
+    #             }
+    #         bulk_requests.append(UpdateOne({'uid': user['uid']}, {
+    #             '$push': portfolio_to_push
+    #         }))
+    #     collection.bulk_write(bulk_requests)
+    #     html_output = f'{count} users were updated!'
+    #     return html_output
 
 
 @users.route("/users/<uid>", methods=["GET"])
