@@ -17,7 +17,7 @@ import pytz
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 
 
@@ -196,22 +196,26 @@ def post_to_update_timeseries_db(ds):
     token_arr = json.loads(ds)
     print('begin post')
     for idx, i in enumerate(token_arr):
-        requests.append(UpdateOne({'coingecko_id': i["coingecko_id"]}, {'$set': {'historical.0.degen_rank': i['degen_rank'], 'historical.0.dev_rank': i['dev_rank'], 'historical.0.community_rank': i['community_rank'], 'historical.0.liquidity_rank': i['liquidity_rank']}}))
+        requests.append(UpdateOne({'coingecko_id': i["coingecko_id"]}, {'$set': {'historical.0.degen_rank': i['degen_rank'],
+                        'historical.0.dev_rank': i['dev_rank'], 'historical.0.community_rank': i['community_rank'], 'historical.0.liquidity_rank': i['liquidity_rank']}}))
         count = count + 1
         if count >= 100:
             count = 0
             try:
                 collection.bulk_write(requests, ordered=False)
-                print(f'Posted {idx} of {len(token_arr)} to token-timeseries collection')
+                print(
+                    f'Posted {idx} of {len(token_arr)} to token-timeseries collection')
             except BulkWriteError as bwe:
                 print(bwe.details)
             requests = []
     try:
         collection.bulk_write(requests, ordered=False)
-        print(f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
+        print(
+            f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
     except BulkWriteError as bwe:
-        print(bwe.details) 
+        print(bwe.details)
     print('Finished posting token top snapshot to token-timeseries collection')
+
 
 def post_to_update_metadata_db(ds):
     count = 0
@@ -220,22 +224,26 @@ def post_to_update_metadata_db(ds):
     token_arr = json.loads(ds)
     print('begin post')
     for idx, i in enumerate(token_arr):
-        requests.append(UpdateOne({'coingecko_id': i["coingecko_id"]}, {"$set": {"degen_rank": i['degen_rank'], "dev_rank": i['dev_rank'],  "community_rank": i['community_rank'], "liquidity_rank": i['liquidity_rank']}}))
+        requests.append(UpdateOne({'coingecko_id': i["coingecko_id"]}, {"$set": {
+                        "degen_rank": i['degen_rank'], "dev_rank": i['dev_rank'],  "community_rank": i['community_rank'], "liquidity_rank": i['liquidity_rank']}}))
         count = count + 1
         if count >= 100:
             count = 0
             try:
                 collection.bulk_write(requests, ordered=False)
-                print(f'Posted {idx} of {len(token_arr)} to token-metadata collection')
+                print(
+                    f'Posted {idx} of {len(token_arr)} to token-metadata collection')
             except BulkWriteError as bwe:
                 print(bwe.details)
             requests = []
     try:
         collection.bulk_write(requests, ordered=False)
-        print(f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
+        print(
+            f'Posted {len(token_arr)} of {len(token_arr)} to token-metadata collection')
     except BulkWriteError as bwe:
         print(bwe.details)
     print('Finished posting token top snapshot to token-metadata collection')
+
 
 def get_top_token_snapshot_and_post_concurrently():
     print('beginning parse through token list')

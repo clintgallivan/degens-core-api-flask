@@ -9,7 +9,7 @@ import time
 import random
 import json
 
-mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+mongo_base_url = os.getenv(host=os.getenv('MONGO_DB_SRV'), connect=False)
 
 
 def get_token_current_metadata():

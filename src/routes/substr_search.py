@@ -8,7 +8,7 @@ from bson import json_util
 import pandas as pd
 import numpy as np
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 collection = db["substr-search"]
 

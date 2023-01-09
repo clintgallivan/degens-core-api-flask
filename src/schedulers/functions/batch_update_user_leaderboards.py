@@ -15,7 +15,7 @@ import copy
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 collection = db["users"]
 

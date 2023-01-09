@@ -10,7 +10,7 @@ import numpy as np
 from datetime import datetime
 import pytz
 
-cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
+cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 collection = db["users"]
 
