@@ -12,14 +12,13 @@ from datetime import datetime, timedelta
 from pymongo import MongoClient, UpdateOne
 import pytz
 import copy
-coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
-mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
 cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
 collection = db["users"]
+coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
+mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
 
-now = datetime.now(pytz.utc)
 new_user_data = []
 
 
@@ -102,7 +101,7 @@ def run_calcs_and_update_user(user_info, current_prices):
                 return
 
             def update_timestamp():
-                user_updated['historical']['portfolios'][portfolio][0]['timestamp'] = now.isoformat(
+                user_updated['historical']['portfolios'][portfolio][0]['timestamp'] = datetime.now(pytz.utc).isoformat(
                     timespec='seconds').replace('+00:00', 'Z')
 
             def update_avg_mcap_rank():
@@ -112,8 +111,8 @@ def run_calcs_and_update_user(user_info, current_prices):
                     tzinfo=pytz.UTC)
 
                 previous_period_duration = og_prev - og_crea
-                current_period_duration = now - og_prev
-                total_duration = now - og_crea
+                current_period_duration = datetime.now(pytz.utc) - og_prev
+                total_duration = datetime.now(pytz.utc) - og_crea
 
                 current_period_total_weight = current_period_duration/total_duration
                 previous_period_total_weight = previous_period_duration/total_duration
@@ -157,8 +156,9 @@ def post_to_db():
             for key in user['historical']['portfolios']:
                 def str_to_datetime(timestamp_as_str):
                     return datetime.strptime(timestamp_as_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.UTC)
+                timestamp_as_dt = user['historical']['portfolios'][f'{key}'][0]['timestamp']
                 user['historical']['portfolios'][f'{key}'][0]['timestamp'] = str_to_datetime(
-                    user['historical']['portfolios'][f'{key}'][0]['timestamp'])
+                    timestamp_as_dt)
                 portfolio_to_push[f'historical.portfolios.{key}'] = {
                     '$each': [
                         user['historical']['portfolios'][f'{key}'][0],
@@ -171,6 +171,7 @@ def post_to_db():
         collection.bulk_write(bulk_requests)
         print(f'{count} users were updated!')
         time.sleep(1)
+    new_user_data.clear()
 
 
 def batch_update_user_leaderboards():
