@@ -53,10 +53,9 @@ def get_current_prices(token_list):
         parsed_token_ids = ",".join(set)
         params = {"vs_currency": "usd", "order": "market_cap_desc",
                   "per_page": 250, "page": 1, "ids": parsed_token_ids}
-        r = requests.get(f'{coingecko_base_url}/coins/markets', params=params)
-        for i in r.json():
+        for i in requests.get(f'{coingecko_base_url}/coins/markets', params=params).json():
             output[i['id']] = {
-                'current_price': i['current_price'], 'mcap_rank': i['market_cap_rank']}
+                'current_price': i['current_price'], 'mcap_rank': i['market_cap_rank'], 'image': i['image']}
     return output
 
 
@@ -89,7 +88,9 @@ def run_calcs_and_update_user(user_info, current_prices):
                         "coingecko_id": i['coingecko_id'],
                         "price": price_after,
                         "percent": weighted_change/total_weight,
-                        "mcap_rank": current_prices[i['coingecko_id']]['mcap_rank']
+                        "mcap_rank": current_prices[i['coingecko_id']]['mcap_rank'],
+                        "image": current_prices[i['coingecko_id']]['image']
+
                     }
                     new_tokens.append(new_token)
                 user_updated['historical']['portfolios'][portfolio][0]['tokens'] = new_tokens
