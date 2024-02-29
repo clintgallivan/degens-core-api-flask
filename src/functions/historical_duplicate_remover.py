@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 
 # cluster = MongoClient(os.getenv('MONGO_DB_SRV'))
-cluster = MongoClient('mongodb+srv://cgallivan:P%40perless2020@cluster0.r1pdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
+cluster = MongoClient('mongodb+srv://cgallivan:P%40perless2020@cluster1.r1pdh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 
 db = cluster["tokens"]
 # collection = db["token-timeseries"]
