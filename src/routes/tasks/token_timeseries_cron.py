@@ -14,7 +14,10 @@ token_timeseries_cron = Blueprint('token_timeseries_cron', __name__,
 
 def get_token_list():
     output = []
-    r = requests.get(f'{coingecko_base_url}/coins/list')
+    headers = {
+        'x-cg-pro-api-key': os.getenv('COINGECKO_API_KEY'),
+    }
+    r = requests.get(f'{coingecko_base_url}/coins/list', headers=headers)
     for token_object in r.json():
         output.append(token_object['id'])
     return output
@@ -30,3 +33,6 @@ def get_token_timeseries_cron():
     print(
         f'Token Timestamp Scheduler Finished at: {dt.datetime.now(pytz.utc)}')
     return 'Token timeseries cron successful'
+
+# curl -H "x-cg-pro-api-key: COINGECKO_API_KEY" "https://api.coingecko.com/api/v3/coins/list" #* curl request to get the list of tokens
+# curl -s -H "x-cg-pro-api-key: COINGECKO_API_KEY" "https://api.coingecko.com/api/v3/coins/list" | jq '. | length' #* curl request to get the length of the list of tokens
