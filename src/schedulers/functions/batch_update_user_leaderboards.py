@@ -18,6 +18,9 @@ db = cluster["tokens"]
 collection = db["users"]
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+headers = {
+    'x-cg-pro-api-key': os.getenv('COINGECKO_API_KEY'),
+}
 
 new_user_data = []
 
@@ -53,7 +56,7 @@ def get_current_prices(token_list):
         parsed_token_ids = ",".join(set)
         params = {"vs_currency": "usd", "order": "market_cap_desc",
                   "per_page": 250, "page": 1, "ids": parsed_token_ids}
-        for i in requests.get(f'{coingecko_base_url}/coins/markets', params=params).json():
+        for i in requests.get(f'{coingecko_base_url}/coins/markets', params=params, headers=headers).json():
             output[i['id']] = {
                 'current_price': i['current_price'], 'mcap_rank': i['market_cap_rank'], 'image': i['image']}
     return output

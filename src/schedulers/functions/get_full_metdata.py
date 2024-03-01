@@ -9,11 +9,13 @@ import random
 import json
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
-
+headers = {
+    'x-cg-pro-api-key': os.getenv('COINGECKO_API_KEY'),
+}
 
 def get_token_list():
     output = []
-    r = requests.get(f'{coingecko_base_url}/coins/list')
+    r = requests.get(f'{coingecko_base_url}/coins/list', headers=headers)
     for token_object in r.json():
         output.append(token_object['id'])
     return output
@@ -21,7 +23,7 @@ def get_token_list():
 
 def get_token_metadata(token_id):
     ds = {}
-    r = requests.get(f'{coingecko_base_url}/coins/{token_id}')
+    r = requests.get(f'{coingecko_base_url}/coins/{token_id}', headers=headers)
     result = r.json()
     # print(result.get("links", '').get("telegram_channel_identifier", ''))
     ds["coingecko_id"] = result.get('id', '')

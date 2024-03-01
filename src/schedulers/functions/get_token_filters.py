@@ -15,11 +15,14 @@ collection = db["token-filters"]
 
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+headers = {
+    'x-cg-pro-api-key': os.getenv('COINGECKO_API_KEY'),
+}
 
 
 def get_platforms_api():
     output = []
-    r = requests.get(f'{coingecko_base_url}/asset_platforms')
+    r = requests.get(f'{coingecko_base_url}/asset_platforms', headers=headers)
     for obj in r.json():
         output.append({'value': obj['id'], 'label': obj['name']})
     return output
@@ -27,7 +30,7 @@ def get_platforms_api():
 
 def get_categories_api():
     output = []
-    r = requests.get(f'{coingecko_base_url}/coins/categories/list')
+    r = requests.get(f'{coingecko_base_url}/coins/categories/list', headers=headers)
     for obj in r.json():
         output.append({'value': obj['name'], 'label': obj['name']})
     return output

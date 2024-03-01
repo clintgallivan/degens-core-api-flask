@@ -299,6 +299,6 @@ def get_token_timestamp_and_post_concurrently(token_id_list):
             time.sleep(1)
             post_to_meta_db(ds[2])
             print('posted')
-            time.sleep(2)
+            # time.sleep(2)
     print('====Done Posting Token Timestamp Data to Db====')
     return
