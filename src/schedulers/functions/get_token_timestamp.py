@@ -22,6 +22,9 @@ db = cluster["tokens"]
 
 coingecko_base_url = os.getenv('COINGECKO_BASE_URL')
 mongo_base_url = os.getenv('MONGO_DB_BASE_URL')
+headers = {
+    'x-cg-pro-api-key': os.getenv('COINGECKO_API_KEY'),
+}
 
 logs = []
 
@@ -29,7 +32,7 @@ logs = []
 def get_token_list():
     print('getting token list')
     output = []
-    r = requests.get(f'{coingecko_base_url}/coins/list')
+    r = requests.get(f'{coingecko_base_url}/coins/list', headers=headers)
     for token_object in r.json():
         output.append(token_object['id'])
     return output
@@ -45,7 +48,7 @@ def get_token_timestamp_data(token_id):
     for i in range(tryCount):
         try:
             r = requests.get(
-                f'{coingecko_base_url}/coins/{token_id}', timeout=waitTime)
+                f'{coingecko_base_url}/coins/{token_id}', timeout=waitTime, headers=headers)
             # print(r)
             r.raise_for_status()
 
