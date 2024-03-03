@@ -33,5 +33,3 @@ def update_token_list_in_db(token_list):
 
 def get_token_list_and_update_db_concurrently():
     update_token_list_in_db(get_token_list())
-
-get_token_list_and_update_db_concurrently()

@@ -1,12 +1,14 @@
 import os
 from flask import Flask
 from flask import request
+from flask_jwt_extended import JWTManager
 import pymongo
 from pymongo import MongoClient
 import json
 from bson import json_util
 import pandas as pd
 import numpy as np
+from src.routes.auth import auth
 from src.routes.default_route import default_route
 from src.routes.token_metadata import token_metadata
 from src.routes.token_timeseries import token_timeseries
@@ -19,9 +21,13 @@ from src.routes.tasks.token_timeseries_cron import token_timeseries_cron
 from src.routes.tasks.token_top_snapshot_cron import token_top_snapshot_cron
 from src.routes.tasks.token_filters_cron import token_filters_cron
 from src.routes.tasks.batch_update_user_leaderboards_cron import batch_update_user_leaderboards_cron
-
+from src.routes.tasks.update_token_list_cron import update_token_list_cron
 app = Flask(__name__)
 
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') 
+jwt = JWTManager(app)
+
+app.register_blueprint(auth)
 app.register_blueprint(default_route)
 app.register_blueprint(token_metadata)
 app.register_blueprint(token_timeseries)
@@ -34,6 +40,7 @@ app.register_blueprint(token_timeseries_cron)
 app.register_blueprint(token_top_snapshot_cron)
 app.register_blueprint(token_filters_cron)
 app.register_blueprint(batch_update_user_leaderboards_cron)
+app.register_blueprint(update_token_list_cron)
 
 
 # if os.environ.get('FLASK_ENV') == 'production':
