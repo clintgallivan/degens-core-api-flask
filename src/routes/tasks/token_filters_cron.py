@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask_jwt_extended import jwt_required
 from ...schedulers.functions.get_token_filters import get_token_filters_and_post_concurrently
 
 import datetime as dt
@@ -9,6 +10,7 @@ token_filters_cron = Blueprint('token_filters_cron', __name__,
 
 
 @token_filters_cron.route("/tasks/token-filters-cron", methods=["GET"])
+@jwt_required()
 def get_token_filters_cron():
     print('Token Filters Scheduler Started')
     get_token_filters_and_post_concurrently()

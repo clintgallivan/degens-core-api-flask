@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint
+from flask_jwt_extended import jwt_required
 from ...schedulers.functions.get_token_timestamp import get_token_timestamp_and_post_concurrently, get_token_list
 
 import datetime as dt
@@ -26,6 +27,7 @@ def get_token_list():
 
 
 @token_timeseries_cron.route("/tasks/token-timeseries-cron", methods=["GET"])
+@jwt_required()
 def get_token_timeseries_cron():
     print('Token Timestamp Scheduler Started')
     get_token_timestamp_and_post_concurrently(get_token_list())
