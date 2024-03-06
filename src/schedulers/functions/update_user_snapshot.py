@@ -26,6 +26,7 @@ headers = {
 new_users_data = []
 
 active_portfolios = ['season_1', 'all_time']
+current_season_portfolio = 'season_1'
 
 def start_backend_job(users_collection):
     # Set the update_in_progress flag
@@ -40,7 +41,7 @@ def get_user_info(page=1, items_per_page=100,):
     keys_to_include = {}
     if params.get('cron'):
         keys_to_include = {
-            "uid": 1, "name": 1, "image": 1, "portfolio_metadata": 1
+            "uid": 1, "name": 1, "username": 1, "image": 1, "portfolio_metadata": 1
         }
 
         for portfolio in active_portfolios:
@@ -182,6 +183,7 @@ def run_calcs_and_update_user(user_info, current_prices):
             update_avg_mcap_rank()
             update_timestamp()
         new_users_data.append(user_updated)
+    return new_users_data
 
 # * This function will calculate the ranks for each user based on their scores and the percentage change in their scores over the last 7 and 30 days
 # * You will how the historical.portfolios[portfolio][0].rank, change_7_days_rank, change_30_days_rank, change_7_days, and change_30_days fields are updated. Also it replaces the same data in portfolio_metadata
@@ -207,9 +209,9 @@ def calc_ranks_and_update_user(new_users_data):
                 user_scores[portfolio_name].append((user_data, score))
 
                 # Calculate the percentage change in score over the last 7 and 30 days
-                now = datetime.now()
+                now = datetime.now(pytz.utc)
                 for portfolio in reversed(portfolios):
-                    timestamp = portfolio.get('timestamp')
+                    timestamp = portfolio.get('timestamp').replace(tzinfo=pytz.UTC)
                     if timestamp and (now - timestamp).days <= 7:
                         old_score = portfolio.get('score', 0)
                         change_7_days = (score - old_score) / old_score if old_score else 0
@@ -289,8 +291,30 @@ def post_to_db(new_users_data):
                 '$set': update_fields
             }))
         collection.bulk_write(bulk_requests)
-        print(f'{count} users were updated!')
+        print(f'{count} users were updated in user collection!')
         time.sleep(1)
+
+def post_top_100_to_db(new_users_data):
+    # Sort users by score in descending order and select top 100
+    top_100_users = sorted(new_users_data, key=lambda x: x.get('historical', {}).get('portfolios', {}).get(current_season_portfolio, [{}])[0].get('score', 0), reverse=True)[:100]
+    # Create new documents for each user
+    users_list = []
+    for user in top_100_users:
+        document = {
+            'uid': user.get('uid', None),
+            'score': user.get('historical', {}).get('portfolios', {}).get(current_season_portfolio, [{}])[0].get('score', None),
+            'average_mcap_rank': user.get('historical', {}).get('portfolios', {}).get(current_season_portfolio, [{}])[0].get('average_mcap_rank', None),
+            'rank': user.get('rank', 0),
+            'image': user.get('image', None),
+            'name': user.get('name', None),
+            'username': user.get('username', None)
+        }
+        users_list.append(document)
+
+    # Replace the previous document with the new one in the 'user-leaderboards-top-100' collection
+    collection = db['user-leaderboards-top-100']
+    collection.replace_one({}, {'top_100_users': users_list}, upsert=True)
+    print(f'user-leaderboards-top-100 collection was updated!')
     new_users_data.clear()
 
 
@@ -301,13 +325,15 @@ def update_user_snapshot():
     print('finished getting user info')
     token_list_sets = create_token_list_sets_to_update(all_users)
     curent_token_data = get_current_token_data(token_list_sets)
-    run_calcs_and_update_user(all_users, curent_token_data)
-    updated_user_data = calc_ranks_and_update_user(all_users)
+    all_users_2 = run_calcs_and_update_user(all_users, curent_token_data)
+    all_users_3 = calc_ranks_and_update_user(all_users_2)
     # * TODO: This would be where we take a snapshot and create a user_top_snapshot collection. It would be updated at this moment.
     print('posting')
-    post_to_db(updated_user_data)
+    post_to_db(all_users_3)
+    post_top_100_to_db(all_users_3)
     end_backend_job(collection)
     print('finished batch updating users')
 
 
-# update_user_snapshot()
+
+update_user_snapshot()
