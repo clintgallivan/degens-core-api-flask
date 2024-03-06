@@ -1,4 +1,5 @@
 
+# ! DEPRECATED - use src/schedulers/functions/batch_update_users.py instead
 # * Run once an hour to update user historical data - call
 import os
 import requests

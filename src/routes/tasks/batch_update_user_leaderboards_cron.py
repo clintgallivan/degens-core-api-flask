@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask_jwt_extended import jwt_required
 from ...schedulers.functions.batch_update_user_leaderboards import batch_update_user_leaderboards
 
 import datetime as dt
@@ -9,6 +10,7 @@ batch_update_user_leaderboards_cron = Blueprint('batch_update_user_leaderboards_
 
 
 @batch_update_user_leaderboards_cron.route("/tasks/batch-update-user-leaderboards-cron", methods=["GET"])
+@jwt_required()
 def get_batch_update_user_leaderboards_cron():
     print('Batch Update User Leaderboards Scheduler Started')
     batch_update_user_leaderboards()
