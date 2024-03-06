@@ -23,6 +23,7 @@ from src.routes.tasks.token_filters_cron import token_filters_cron
 from src.routes.tasks.batch_update_user_leaderboards_cron import batch_update_user_leaderboards_cron
 from src.routes.tasks.update_token_list_cron import update_token_list_cron
 from src.routes.tasks.update_user_snapshot_cron import update_user_snapshot_cron
+from src.routes.tasks.update_substr_search_cron import update_substr_search_cron
 app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') 
@@ -43,6 +44,7 @@ app.register_blueprint(token_filters_cron)
 app.register_blueprint(batch_update_user_leaderboards_cron)
 app.register_blueprint(update_token_list_cron)
 app.register_blueprint(update_user_snapshot_cron)
+app.register_blueprint(update_substr_search_cron)
 
 
 # if os.environ.get('FLASK_ENV') == 'production':

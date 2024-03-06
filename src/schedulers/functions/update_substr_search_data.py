@@ -43,4 +43,4 @@ def get_token_substr_data_and_post_concurrently():
     reduce_data_and_post(table)
     print('done')
 
-get_token_substr_data_and_post_concurrently()
+# get_token_substr_data_and_post_concurrently()
