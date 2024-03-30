@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pymongo import MongoClient, UpdateOne
 import pytz
 import copy
+from dateutil.parser import parse
 
 cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster["tokens"]
@@ -91,8 +92,11 @@ def get_current_token_data(token_list_sets):
         params = {"vs_currency": "usd", "order": "market_cap_desc",
                   "per_page": 250, "page": 1, "ids": parsed_token_ids}
         for i in requests.get(f'{coingecko_base_url}/coins/markets', params=params, headers=headers).json():
+            mcap_rank = i.get('market_cap_rank', 3000)
+            if mcap_rank is None:
+                mcap_rank = 3000
             output[i['id']] = {
-                'current_price': i['current_price'], 'mcap_rank': i['market_cap_rank'], 'image': i['image']}
+                'current_price': i['current_price'], 'mcap_rank': mcap_rank, 'image': i['image']}
     return output
 
 
@@ -142,8 +146,8 @@ def run_calcs_and_update_user(user_info, current_prices):
             
             # * This function will update the timestamp to the current time
             def update_timestamp():
-                user_updated['historical']['portfolios'][portfolio][0]['timestamp'] = datetime.now(pytz.utc).isoformat(
-                    timespec='seconds').replace('+00:00', 'Z')
+                user_updated['historical']['portfolios'][portfolio][0]['timestamp'] = parse(datetime.now(pytz.utc).isoformat(
+                    timespec='seconds').replace('+00:00', 'Z'))
 
             def update_avg_mcap_rank():
                 og_prev = user_original['historical']['portfolios'][portfolio][0]['timestamp'].replace(
@@ -161,7 +165,9 @@ def run_calcs_and_update_user(user_info, current_prices):
                 def current_period_avg_mcap_rank():
                     total_average = 0
                     for i in user_original['historical']['portfolios'][portfolio][0]['tokens']:
-                        mcap_rank = i['mcap_rank']
+                        mcap_rank = i.get('mcap_rank', 3000)
+                        if mcap_rank is None:
+                            mcap_rank = 3000
                         starting_percent = i['percent']
                         ending_percent = starting_percent
                         for token_obj in user_updated['historical']['portfolios'][portfolio][0]['tokens']:
@@ -210,6 +216,8 @@ def calc_ranks_and_update_user(new_users_data):
 
                 # Calculate the percentage change in score over the last 7 and 30 days
                 now = datetime.now(pytz.utc)
+
+                
                 for portfolio in reversed(portfolios):
                     timestamp = portfolio.get('timestamp').replace(tzinfo=pytz.UTC)
                     if timestamp and (now - timestamp).days <= 7:
@@ -301,6 +309,7 @@ def post_top_100_to_db(new_users_data):
     users_list = []
     for user in top_100_users:
         document = {
+            '_id': user.get('_id', None),
             'uid': user.get('uid', None),
             'score': user.get('historical', {}).get('portfolios', {}).get(current_season_portfolio, [{}])[0].get('score', None),
             'average_mcap_rank': user.get('historical', {}).get('portfolios', {}).get(current_season_portfolio, [{}])[0].get('average_mcap_rank', None),
@@ -336,4 +345,4 @@ def update_user_snapshot():
 
 
 
-update_user_snapshot()
+# update_user_snapshot()
