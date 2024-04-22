@@ -25,6 +25,7 @@ from src.routes.tasks.update_token_list_cron import update_token_list_cron
 from src.routes.tasks.update_user_snapshot_cron import update_user_snapshot_cron
 from src.routes.tasks.update_substr_search_cron import update_substr_search_cron
 from src.routes.tasks.jupiter_timeseries_cron.route.jupiter_timeseries_cron import jupiter_timeseries_cron
+from src.routes.tasks.v2.jupiter_tokens_cron.route.jupiter_tokens_cron import jupiter_tokens_cron
 # from src.routes.non_recurring_tasks.import_zerion_wallet import import_zerion_wallet
 app = Flask(__name__)
 
@@ -48,6 +49,7 @@ app.register_blueprint(update_token_list_cron)
 app.register_blueprint(update_user_snapshot_cron)
 app.register_blueprint(update_substr_search_cron)
 app.register_blueprint(jupiter_timeseries_cron)
+app.register_blueprint(jupiter_tokens_cron)
 # app.register_blueprint(import_zerion_wallet)
 
 
