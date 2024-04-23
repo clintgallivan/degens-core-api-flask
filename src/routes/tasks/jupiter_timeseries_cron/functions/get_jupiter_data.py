@@ -3,17 +3,17 @@ import requests
 from datetime import datetime, timezone
 import json
 
-jupiter_base_url = os.getenv('JUPITER_BASE_URL')
+jupiter_price_base_url = os.getenv('JUPITER_PRICE_BASE_URL')
 
 def get_jupiter_data(token_addresses):
-    # Function to divide token addresses into chunks of 30
+    # Function to divide token addresses into chunks of 100
     def chunks(lst, n):
         """Yield successive n-sized chunks from lst."""
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
 
-    # Splitting the addresses into chunks of 30
-    address_chunks = list(chunks(token_addresses, 30))
+    # Splitting the addresses into chunks of 100
+    address_chunks = list(chunks(token_addresses, 100))
     
     # Accumulator for the results from all API calls
     all_data = []
@@ -24,7 +24,7 @@ def get_jupiter_data(token_addresses):
         ids = ','.join(chunk)
         
         # Make the API call
-        response = requests.get(f'{jupiter_base_url}/v4/price?ids={ids}')
+        response = requests.get(f'{jupiter_price_base_url}/v4/price?ids={ids}')
         
         # Check if the response was successful
         if response.status_code == 200:
