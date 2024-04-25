@@ -6,8 +6,8 @@ import json
 jupiter_price_base_url = os.getenv('JUPITER_TOKENS_BASE_URL')
 
 def get_jupiter_data():
-    r = requests.get(f'{jupiter_price_base_url}/strict')
-    # r = requests.get(f'{jupiter_price_base_url}/all')
+    # r = requests.get(f'{jupiter_price_base_url}/strict')
+    r = requests.get(f'{jupiter_price_base_url}/all')
     all_data = r.json()
 
     jupiter_tokens_list = []
