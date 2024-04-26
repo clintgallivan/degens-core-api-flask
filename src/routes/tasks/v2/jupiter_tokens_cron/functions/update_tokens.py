@@ -4,7 +4,10 @@ import os
 
 cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=False)
 db = cluster['prod']
-timeseries_collection = db['tokens']
+tokens_collection = db['tokens']
+
+# Create an index on 'mint_address' to optimize queries and updates
+index_creation_result = tokens_collection.create_index([('mint_address', 1)], unique=False)
 
 def update_tokens(jupiter_data):
     operations = []
@@ -45,11 +48,11 @@ def update_tokens(jupiter_data):
         operations.append(operation)
 
         # Perform the batch update when we have accumulated enough operations
-        if len(operations) == 1000:
-            timeseries_collection.bulk_write(operations)
+        if len(operations) == 500:
+            tokens_collection.bulk_write(operations, ordered=False)
             operations = []
 
     # Perform the batch update for any remaining operations
     if operations:
-        timeseries_collection.bulk_write(operations)
+        tokens_collection.bulk_write(operations, ordered=False)
 
