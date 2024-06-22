@@ -1,47 +1,34 @@
-from pymongo import MongoClient, UpdateOne
+from pymongo import MongoClient
 import os
 
 # Setting up the MongoDB connection
 cluster = MongoClient(host=os.getenv('MONGO_DB_SRV'), connect=True)  # Utilizing connection pooling
 db = cluster['prod']
-timeseries_collection = db['tokens-timeseries']
-
-# Create an index on 'mint_address' to optimize queries and updates
-index_creation_result = timeseries_collection.create_index([('mint_address', 1)], unique=False)
+timeseries_collection = db['tokens-timeseries-5m-interval-28h-expiry']
 
 def update_tokens_timeseries(jupiter_data):
-    operations = []
+    documents = []
     for data in jupiter_data:
+        # Assuming 'adx' needs to be calculated or is provided in 'data'
         mint_address = data['mint_address']
-        price = data['price']
         created_at = data['created_at']
+        price = data['price']
 
-        operation = UpdateOne(
-            {'mint_address': mint_address},
-            {
-                '$setOnInsert': {
-                    'created_at': created_at,
-                },
-                '$set': {'updated_at': created_at},
-                '$push': {
-                    'historical': {
-                        '$each': [{'price': price, 'created_at': created_at}],
-                        '$position': 0  # Insert at the start of the array
-                    }
-                }
-            },
-            upsert=True
-        )
-        operations.append(operation)
+        document = {
+            'mint_address': mint_address,
+            'created_at': created_at,
+            'price': price
+        }
+        documents.append(document)
 
         # Consider batching logic; for example, execute operations every 500 documents
-        if len(operations) == 500:
-            timeseries_collection.bulk_write(operations, ordered=False)
-            operations = []
+        if len(documents) == 500:
+            timeseries_collection.insert_many(documents, ordered=False)
+            documents = []
 
     # Execute any remaining operations in the batch
-    if operations:
-        timeseries_collection.bulk_write(operations, ordered=False)
+    if documents:
+        timeseries_collection.insert_many(documents, ordered=False)
 
 # Example usage with data coming from somewhere (e.g., an API or another function)
 # update_tokens_timeseries(jupiter_data)
