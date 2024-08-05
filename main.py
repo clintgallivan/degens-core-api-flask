@@ -26,7 +26,6 @@ from src.routes.tasks.update_user_snapshot_cron import update_user_snapshot_cron
 from src.routes.tasks.update_substr_search_cron import update_substr_search_cron
 from src.routes.tasks.jupiter_timeseries_cron.route.jupiter_timeseries_cron import jupiter_timeseries_cron
 from src.routes.tasks.v2.jupiter_tokens_cron.route.jupiter_tokens_cron import jupiter_tokens_cron
-from src.routes.tasks.v2.delete_old_historical_entries_cron.route.delete_old_historical_entries_cron import delete_old_historical_entries_cron
 
 app = Flask(__name__)
 
@@ -51,7 +50,6 @@ app.register_blueprint(update_user_snapshot_cron)
 app.register_blueprint(update_substr_search_cron)
 app.register_blueprint(jupiter_timeseries_cron)
 app.register_blueprint(jupiter_tokens_cron)
-app.register_blueprint(delete_old_historical_entries_cron)
 
 
 # if os.environ.get('FLASK_ENV') == 'production':
